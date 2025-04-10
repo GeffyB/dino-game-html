@@ -1,0 +1,59 @@
+/*  Estilo global para o mundo jurássico */
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+  
+  h1 {
+    margin: 20px 0;
+    font-size: 2rem;
+  }
+  
+  /*  Arena onde o dinofauro se consagra */
+  #arena-do-dinofauro {
+    position: relative;
+    width: 800px;
+    height: 200px;
+    margin: 0 auto;
+    background-color: #e0e0e0;
+    border: 2px dashed #999;
+    overflow: hidden;
+  }
+  
+  /*  O grande guerreiro jurássico */
+  #dinofauro {
+    position: absolute;
+    bottom: 0;
+    left: 50px;
+    width: 50px;
+    height: 50px;
+    background-color: #2ecc71; /* Verde motivado */
+    border-radius: 5px;
+    transform: translateY(0); /* ⬅️ Ponto inicial do movimento */
+  }
+  
+  /*  Nosso primeiro inimigo */
+  #espinhudo {
+    position: absolute;
+    bottom: 0;
+    right: -50px;
+    width: 30px;
+    height: 50px;
+    background-color: #e74c3c; /* Vermelho do mal */
+    border-radius: 4px;
+    animation: moveEspinhudo 2.5s linear infinite;  /*Velocidade mais semlhante ao original */
+  }
+  
+  /*  Animação básica do espinhudo vindo pra cima */
+  @keyframes moveEspinhudo {
+    0% {
+      right: -50px;
+    }
+    100% {
+      right: 850px;
+    }
+  }
+  
