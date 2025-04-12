@@ -12,6 +12,26 @@ body {
     font-size: 2rem;
   }
   
+  /* HUD de métricas de desempenho */
+#hud {
+  margin-bottom: 10px;
+  font-size: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  color: #333;
+  font-weight: bold;
+}
+
+#menu-de-controle {
+  margin: 10px auto;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  font-size: 1rem;
+}
+
+  
   /*  Arena onde o dinofauro se consagra */
   #arena-do-dinofauro {
     position: relative;
@@ -46,6 +66,10 @@ body {
     border-radius: 4px;
     animation: moveEspinhudo 2.5s linear infinite;  /*Velocidade mais semlhante ao original */
   }
+  #espinhudo.pausado {
+    animation-play-state: paused;
+  }
+  
   
   /*  Animação básica do espinhudo vindo pra cima */
   @keyframes moveEspinhudo {

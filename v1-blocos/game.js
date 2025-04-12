@@ -1,22 +1,30 @@
 // ------------------------------------------------------------
-// DinoFauro 🦖 – Módulo de Jogo (mundo e física)
-// Versão: v1-blocos ✅
+// DinoFauro 🦖 – Módulo Principal do Jogo
+// Versão: v1-blocos | Organização + Comentários Didáticos ✅
 // ------------------------------------------------------------
 
-// Seleciona os heróis e vilões
-// Usando escopo global para acesso compartilhado com agent.js
+// ========== [VARIÁVEIS GLOBAIS] ========== //
+
+// Elementos do DOM (compartilhado com agent.js)
 window.dinofauro = document.getElementById("dinofauro");
 window.espinhudo = document.getElementById("espinhudo");
 
-// ------------------------------------------------------------
-// Estado do pulo (bloqueia múltiplos pulos manuais)
+// Estados de controle
 let pulandoNoAr = false;
+let tempoDeSobrevivencia = 0;
+let pulosRealizados = 0;
+let obstaculosEvitados = 0;
+let houveColisao = false;
+let modoIA = true;
+let jogoEmAndamento = false;
+let cronometroID = null;
 
-// ------------------------------------------------------------
-// Função de pulo (manual, usada pelo jogador)
+
+// ========== [FUNÇÕES DE MECÂNICA DE JOGO] ========== //
+
+// Faz o dinofauro pular manualmente (modo jogador)
 function dinofauroPula() {
-  if (pulandoNoAr) return; // Impede pulo duplo (estilo pro player)
-
+  if (pulandoNoAr) return;
   pulandoNoAr = true;
   let altura = 0;
 
@@ -24,12 +32,9 @@ function dinofauroPula() {
   const velocidadeSubida = 4;
   const velocidadeDescida = 3;
 
-  // Subida do dinofauro
   const subir = setInterval(() => {
     if (altura >= puloAlturaMax) {
       clearInterval(subir);
-
-      // Início da descida
       const descer = setInterval(() => {
         if (altura <= 0) {
           clearInterval(descer);
@@ -46,21 +51,122 @@ function dinofauroPula() {
   }, 10);
 }
 
-// ------------------------------------------------------------
-// Controle manual ativável (usuário joga com teclado)
-// Para ativar, basta remover os comentários abaixo:
-  
-/*
-document.addEventListener("keydown", function (event) {
-  if (event.code === "Space" || event.code === "ArrowUp") {
+
+// ========== [FUNÇÕES DE MODO JOGADOR] ========== //
+
+function ativarTecladoJogador() {
+  document.addEventListener("keydown", aoPressionarTecla);
+}
+
+function aoPressionarTecla(event) {
+  if (event.code === "Space" && !houveColisao && jogoEmAndamento) {
     dinofauroPula();
   }
-});
-*/
+}
 
-// ------------------------------------------------------------
-// Verifica colisão entre o dinofauro e o espinhudo
+
+// ========== [FUNÇÕES DE MODO IA] ========== //
+
+function iniciarIA() {
+  tempoDesdeUltimoPulo = 999;
+  const loopIA = setInterval(() => {
+    if (houveColisao || !jogoEmAndamento || !modoIA) {
+      clearInterval(loopIA);
+      return;
+    }
+
+    const distancia = espinhudo.offsetLeft - dinofauro.offsetLeft;
+
+    if (
+      distancia < 120 &&
+      distancia > 0 &&
+      !oDinoTaPulando &&
+      tempoDesdeUltimoPulo > 30
+    ) {
+      fazerDinoDarAquelaPulada();
+      tempoDesdeUltimoPulo = 0;
+    }
+
+    tempoDesdeUltimoPulo++;
+  }, 20);
+}
+
+
+// ========== [CONTADOR DE TEMPO] ========== //
+
+function iniciarContadorDeTempo() {
+  if (cronometroID) clearInterval(cronometroID);
+  tempoDeSobrevivencia = 0;
+
+  const formatarTempo = (s) => {
+    const h = String(Math.floor(s / 3600)).padStart(2, '0');
+    const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+    const seg = String(s % 60).padStart(2, '0');
+    return `${h}:${m}:${seg}`;
+  };
+
+  cronometroID = setInterval(() => {
+    if (houveColisao || !jogoEmAndamento) {
+      clearInterval(cronometroID);
+      cronometroID = null;
+    } else {
+      tempoDeSobrevivencia++;
+      document.getElementById("tempo").innerText = `⏱️ Tempo: ${formatarTempo(tempoDeSobrevivencia)}`;
+    }
+  }, 1000);
+}
+
+
+// ========== [INICIALIZAÇÃO E CICLO DE JOGO] ========== //
+
+function iniciarJogo() {
+  houveColisao = false;
+  jogoEmAndamento = true;
+
+  tempoDeSobrevivencia = 0;
+  pulosRealizados = 0;
+  obstaculosEvitados = 0;
+
+  document.getElementById("tempo").innerText = `⏱️ Tempo: 00:00:00`;
+  document.getElementById("pulos").innerText = `🦘 Pulos: 0`;
+  document.getElementById("evitados").innerText = `🧱 Evitados: 0`;
+  document.getElementById("status").innerText = `🎮 Em jogo...`;
+
+  iniciarContadorDeTempo();
+
+  if (modoIA) {
+    iniciarIA();
+  } else {
+    ativarTecladoJogador();
+  }
+
+  espinhudo.style.animation = "none";
+  void espinhudo.offsetWidth;
+  espinhudo.style.animation = "";
+  espinhudo.classList.remove("pausado");
+}
+
+function resetarJogo() {
+  jogoEmAndamento = false;
+  houveColisao = false;
+
+  espinhudo.classList.add("pausado");
+  document.getElementById("status").innerText = "🕹️ Aguardando início...";
+
+  document.removeEventListener("keydown", aoPressionarTecla);
+
+  if (cronometroID) {
+    clearInterval(cronometroID);
+    cronometroID = null;
+  }
+  document.getElementById("botao-start").disabled = false;
+}
+
+
+// ========== [COLISÃO E LOOP PRINCIPAL] ========== //
+
 function checarColisao() {
+  if (houveColisao) return;
   const dinofauroBox = dinofauro.getBoundingClientRect();
   const espinhudoBox = espinhudo.getBoundingClientRect();
 
@@ -69,11 +175,32 @@ function checarColisao() {
     dinofauroBox.left < espinhudoBox.right - 5 &&
     dinofauroBox.bottom > espinhudoBox.top
   ) {
+    houveColisao = true;
+    jogoEmAndamento = false;
+    document.getElementById("status").innerText = "💀 Game Over!";
+    document.removeEventListener("keydown", aoPressionarTecla);
     alert("💀 Game Over! O Espinhudo venceu essa rodada...");
-    location.reload();
+    resetarJogo();
   }
 }
 
-// ------------------------------------------------------------
-// Loop de verificação de colisão
 setInterval(checarColisao, 10);
+
+
+// ========== [INTERAÇÃO COM A INTERFACE] ========== //
+
+window.onload = () => {
+  document.getElementById("status").innerText = "🕹️ Aguardando início...";
+};
+
+document.getElementById("botao-start").addEventListener("click", () => {
+  modoIA = document.getElementById("modo-jogo").value === "ia";
+  iniciarJogo();
+  document.getElementById("botao-start").blur();
+  document.getElementById("botao-start").disabled = true;
+});
+
+document.getElementById("botao-parar").addEventListener("click", () => {
+  resetarJogo();
+  document.getElementById("status").innerText = "⏸️ Jogo pausado.";
+});

@@ -9,13 +9,36 @@
 <body>
   <h1>DinoFauro 🦖 — IA no Velocirritmo</h1>
 
+   <!-- HUD de Métricas -->
+   <div id="hud">
+    <span id="tempo">⏱️ Tempo: 0</span>
+    <span id="pulos">🦘 Pulos: 0</span>
+    <span id="evitados">🧱 Evitados: 0</span>
+    <span id="status">🎮 Em jogo...</span>
+  </div>
+  
+  <!-- Menu de controle -->
+<div id="menu-de-controle">
+  <label for="modo-jogo">Modo de jogo:</label>
+  <select id="modo-jogo">
+    <option value="ia" selected>IA</option>
+    <option value="jogador">Jogador</option>
+  </select>
+
+  <button id="botao-start">Iniciar Jogo</button>
+  <button id="botao-parar">Parar Jogo</button>
+
+</div>
+
+
   <!-- Área onde a mágica jurássica acontece -->
   <div id="arena-do-dinofauro">
     <!-- Nosso herói jurássico -->
     <div id="dinofauro"></div>
 
     <!-- O cacto do apocalipse -->
-    <div id="espinhudo"></div>
+    <div id="espinhudo" class="pausado"></div>
+
   </div>
 
   <!-- Scripts do jogo e do cérebro artificial -->
