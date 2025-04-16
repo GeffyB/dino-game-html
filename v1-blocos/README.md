@@ -1,5 +1,27 @@
 # Histórico da Versão v1-blocos
 
+## 📦 Versão Arquivada: `v2.1-vis` – Sprites Visuais
+
+> Status: ❌ Arquivada (instável)
+
+Tentativa de substituir as `divs` do dinossauro por sprites visuais pixel art personalizados.  
+Apesar da estética mais próxima do jogo original, essa versão foi arquivada por apresentar os seguintes problemas:
+
+- Diferenças de alinhamento entre sprites de salto/corrida
+- Bug visual: o dinossauro continuava correndo após a colisão
+- Hitbox inconsistente devido a áreas transparentes nos sprites
+- A tecla de espaço fechava o `alert()` de Game Over e causava bugs no controle
+
+Esses problemas indicam que o sistema atual baseado em `div + classList` ainda é o mais estável e funcional neste estágio do projeto.
+
+### Próximos passos:
+- Retomar com a base da `v2.0`
+- Evoluir as funcionalidades (múltiplos obstáculos, abaixar, voador)
+- Planejar reintrodução dos sprites futuramente, com estrutura mais robusta
+
+---
+
+
 ## 🔹 v2.0 – Instrumentação e Exportação de Logs (Analytics)
 
 ### 📅 Data: 16/04/2025
