@@ -25,6 +25,8 @@ let cronometroID = null;
 // Faz o dinofauro pular manualmente (modo jogador)
 function dinofauroPula() {
   if (pulandoNoAr) return;
+  pulosRealizados++;
+  document.getElementById("pulos").innerText = `🦘 Pulos: ${pulosRealizados}`;
   pulandoNoAr = true;
   let altura = 0;
 
@@ -203,4 +205,11 @@ document.getElementById("botao-start").addEventListener("click", () => {
 document.getElementById("botao-parar").addEventListener("click", () => {
   resetarJogo();
   document.getElementById("status").innerText = "⏸️ Jogo pausado.";
+});
+
+espinhudo.addEventListener("animationiteration", () => {
+  if (jogoEmAndamento && !houveColisao) {
+    obstaculosEvitados++;
+    document.getElementById("evitados").innerText = `🧱 Evitados: ${obstaculosEvitados}`;
+  }
 });

@@ -15,6 +15,8 @@ let tempoDesdeUltimoPulo = 999; // começa liberado para pular
 // Função usada pela IA para executar o pulo com as mesmas regras do jogador
 function fazerDinoDarAquelaPulada() {
   if (oDinoTaPulando) return;
+  pulosRealizados++;
+  document.getElementById("pulos").innerText = `🦘 Pulos: ${pulosRealizados}`;
   oDinoTaPulando = true;
 
   let altura = 0;

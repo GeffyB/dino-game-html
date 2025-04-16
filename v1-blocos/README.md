@@ -1,44 +1,46 @@
-# 🦖 DinoFauro – Versão v1-blocos
+# Histórico da Versão v1-blocos
 
-Jogo estilo *Dino Run* com agente IA heurístico simples. Desenvolvido como MVP funcional para testes e evolução com Aprendizado por Reforço.
+## 🔹 v1.1 — HUD com Métricas Dinâmicas (pulos e evitados)
 
-## Estrutura do Projeto
+### Data: 16/04/2025
 
-- `index.html` — Estrutura da página e interface do jogo.
-- `style.css` — Estilização dos elementos gráficos (HUD, arena, personagens).
-- `game.js` — Lógica principal do jogo, controle de modos, mecânica de pulo, cronômetro e colisões.
-- `agent.js` — Função de pulo automática usada pelo agente IA.
+### Objetivo
+Instrumentar o HUD com contadores dinâmicos:
+- 🦘 Pulos realizados (tanto no modo IA quanto Jogador)
+- 🧱 Obstáculos evitados (detecção de término da animação do espinhudo)
 
-## Funcionalidades Implementadas
+### Implementado
+- Incremento de `pulosRealizados++` nas funções de pulo manual e IA.
+- Atualização da HUD com `document.getElementById("pulos").innerText`.
+- Listener `animationiteration` no espinhudo para contar obstáculos evitados.
+- Proteção para só contar quando o jogo estiver ativo e sem colisão (`jogoEmAndamento && !houveColisao`).
 
-### ✅ MVP Jogável com IA Heurística
-- Jogo funciona tanto em **modo IA** quanto **modo Jogador**.
-- IA pula automaticamente com base na distância do obstáculo.
-- Jogador usa **barra de espaço** para controlar o dinofauro.
+### Resultado
+- HUD atualiza em tempo real.
+- Contadores zeram automaticamente a cada `iniciarJogo()`.
+- Funciona corretamente em ambos os modos de jogo.
 
-### ✅ Controle de Execução
-- Botão "Iniciar Jogo" ativa o jogo e aplica o modo selecionado (IA ou jogador).
-- Botão "Parar Jogo" pausa o jogo e reseta o estado para escolha de novo modo.
+---
 
-### ✅ HUD de Métricas
-- Tempo de sobrevivência (formato `hh:mm:ss`).
-- Pulos realizados (ainda não instrumentado).
-- Obstáculos evitados (ainda não instrumentado).
-- Estado atual: "Em jogo", "Pausado", "Game Over".
+## 🔹 v1.0 — MVP com IA Heurística
 
-### ✅ Ciclo de Jogo Controlado
-- IA e cronômetro só iniciam após o clique em "Iniciar".
-- Game Over mostra alerta e bloqueia controles até novo start.
-- Animação do espinhudo pausada até o jogo começar.
+### Data: 
 
-## Próximas Etapas
+### Objetivo
+Construir um MVP funcional com IA heurística simples e lógica de execução clara para rodar o jogo do dinossauro.
 
-- Instrumentar contagem real de **pulos realizados** e **obstáculos evitados**.
-- Introduzir **randomização de obstáculos** (posição, frequência, velocidade).
-- Início da transição para **aprendizado por reforço** (Q-Learning, DQN).
-- Testes comparativos entre IA heurística e agentes treinados.
+### Funcionalidades
+- Execução via botão "Iniciar Jogo" com modo IA ou Jogador.
+- Cronômetro com formatação `hh:mm:ss`.
+- Controle total do ciclo: iniciar, pausar, detectar colisão.
+- HUD inicial com tempo, pulos, evitados (visuais).
+- Game Over bloqueia o jogo e aguarda reinício manual.
 
-## Sobre o Projeto
-Este repositório faz parte de uma jornada prática de construção de agentes inteligentes em jogos 2D simples, evoluindo da heurística ao aprendizado automático.
+### Estrutura modular
+- `game.js`: controle de estado, execução, HUD e colisão.
+- `agent.js`: lógica de pulo IA.
+- `index.html` + `style.css`: arena e visualização.
 
-> Organização modular, código comentado com foco em reusabilidade e controle total do ciclo de execução.
+---
+
+> Para referência da estrutura inicial não organizada, veja: `README-v1-pre-org.md`
