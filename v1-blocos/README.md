@@ -1,5 +1,32 @@
 # Histórico da Versão v1-blocos
 
+## 🔹 v1.3 — IA Heurística Aprimorada + Instrumentação de Logs
+
+### 📅 Data: 16/04/2025
+
+### Objetivo
+Aprimorar a IA heurística para lidar melhor com obstáculos aleatórios (introduzidos na v1.2) e iniciar instrumentação de decisões para futuras análises e papers.
+
+### Implementado
+- Ajuste da lógica de decisão da IA no `iniciarIA()`:
+  - Distância de reação agora é adaptativa: `distanciaLimite = 90 + velocidade * 2.5`
+  - Menor tempo entre pulos: `tempoDesdeUltimoPulo > 15`
+- Adição de `console.log()` para registrar:
+  - Distância entre dinofauro e obstáculo no momento do pulo
+  - Velocidade atual do espinhudo
+  - Valor do `distanciaLimite` usado na decisão
+
+### Resultado
+- IA alcança ~66% de sucesso com comportamento mais natural
+- Quando o espinhudo é lento, o pulo ainda pode ser ligeiramente tardio (colisão na descida)
+- Instrumentação permite análise objetiva futura (exportação, gráficos, comparação entre heurísticas e RL)
+
+### Observações
+- A estrutura de log abre espaço para coleta de dados de treino supervisionado ou avaliação de desempenho RL
+- Esse ponto marca o fim da fase "IA heurística pura"
+
+---
+
 ## 🔹 v1.2 — Obstáculos com Comportamento Randomizado (spawn e velocidade)
 
 ### 📅 Data: 16/04/2025

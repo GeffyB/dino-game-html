@@ -83,12 +83,20 @@ function iniciarIA() {
 
     const distancia = espinhudo.offsetLeft - dinofauro.offsetLeft;
 
-    if (
-      distancia < 120 &&
-      distancia > 0 &&
-      !oDinoTaPulando &&
-      tempoDesdeUltimoPulo > 30
-    ) {
+// IA ajusta distância com base na velocidade e tempo de reação
+const distanciaLimite = 90 + velocidadeEspinhudo * 2.5;
+
+if (
+  distancia < distanciaLimite &&
+  distancia > 0 &&
+  !oDinoTaPulando &&
+  tempoDesdeUltimoPulo > 15
+) {
+  console.log(`[IA] Pulando com distância: ${distancia.toFixed(2)}, limite: ${distanciaLimite.toFixed(2)}, velocidade: ${velocidadeEspinhudo.toFixed(2)}`);
+  fazerDinoDarAquelaPulada();
+  tempoDesdeUltimoPulo = 0;
+}
+{
       fazerDinoDarAquelaPulada();
       tempoDesdeUltimoPulo = 0;
     }
