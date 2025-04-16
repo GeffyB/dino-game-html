@@ -24,6 +24,8 @@ let posicaoEspinhudo = 800; // posição inicial (fora da tela)
 let velocidadeEspinhudo = 4; // pode aumentar com o tempo
 let intervaloSpawn = 1200;  // delay entre obstáculos
 
+let logEventos = []; // Novo: armazena eventos para exportação e análise
+
 
 // ========== [FUNÇÕES DE MECÂNICA DE JOGO] ========== //
 
@@ -32,6 +34,14 @@ function dinofauroPula() {
   pulandoNoAr = true;
   pulosRealizados++;
   document.getElementById("pulos").innerText = `🦘 Pulos: ${pulosRealizados}`;
+
+  logEventos.push({
+    tempo: tempoDeSobrevivencia,
+    evento: "pulo",
+    agente: "Jogador",
+    distancia: Math.floor(espinhudo.offsetLeft - dinofauro.offsetLeft),
+    velocidade: velocidadeEspinhudo
+  });
 
   let altura = 0;
   const puloAlturaMax = 100;
@@ -75,6 +85,7 @@ function aoPressionarTecla(event) {
 
 function iniciarIA() {
   tempoDesdeUltimoPulo = 999;
+
   const loopIA = setInterval(() => {
     if (houveColisao || !jogoEmAndamento || !modoIA) {
       clearInterval(loopIA);
@@ -82,9 +93,7 @@ function iniciarIA() {
     }
 
     const distancia = espinhudo.offsetLeft - dinofauro.offsetLeft;
-
-// IA ajusta distância com base na velocidade e tempo de reação
-const distanciaLimite = 90 + velocidadeEspinhudo * 2.5;
+    const distanciaLimite = 90 + velocidadeEspinhudo * 2.5; // IA ajusta distância com base na velocidade e tempo de reação
 
 if (
   distancia < distanciaLimite &&
@@ -93,13 +102,10 @@ if (
   tempoDesdeUltimoPulo > 15
 ) {
   console.log(`[IA] Pulando com distância: ${distancia.toFixed(2)}, limite: ${distanciaLimite.toFixed(2)}, velocidade: ${velocidadeEspinhudo.toFixed(2)}`);
+  
   fazerDinoDarAquelaPulada();
   tempoDesdeUltimoPulo = 0;
-}
-{
-      fazerDinoDarAquelaPulada();
-      tempoDesdeUltimoPulo = 0;
-    }
+}                       
 
     tempoDesdeUltimoPulo++;
   }, 20);
@@ -149,6 +155,14 @@ function moverEspinhudo() {
   if (posicaoEspinhudo < -50) {
     obstaculosEvitados++;
     document.getElementById("evitados").innerText = `🧱 Evitados: ${obstaculosEvitados}`;
+    
+    logEventos.push({
+      tempo: tempoDeSobrevivencia,
+      evento: "evitado",
+      agente: modoIA ? "IA" : "Jogador",
+      velocidade: velocidadeEspinhudo
+    });
+    
     setTimeout(iniciarEspinhudo, 500 + Math.random() * intervaloSpawn);
   } else {
     requestAnimationFrame(moverEspinhudo);
@@ -205,6 +219,7 @@ function resetarJogo() {
 
 function checarColisao() {
   if (houveColisao) return;
+
   const dinofauroBox = dinofauro.getBoundingClientRect();
   const espinhudoBox = espinhudo.getBoundingClientRect();
 
@@ -215,6 +230,15 @@ function checarColisao() {
   ) {
     houveColisao = true;
     jogoEmAndamento = false;
+
+    logEventos.push({
+      tempo: tempoDeSobrevivencia,
+      evento: "colisao",
+      agente: modoIA ? "IA" : "Jogador",
+      distancia: Math.floor(espinhudo.offsetLeft - dinofauro.offsetLeft),
+      velocidade: velocidadeEspinhudo
+    });
+
     document.getElementById("status").innerText = "💀 Game Over!";
     document.removeEventListener("keydown", aoPressionarTecla);
     alert("💀 Game Over! O Espinhudo venceu essa rodada...");
@@ -242,3 +266,24 @@ document.getElementById("botao-parar").addEventListener("click", () => {
   resetarJogo();
   document.getElementById("status").innerText = "⏸️ Jogo pausado.";
 });
+
+document.getElementById("botao-exportar").addEventListener("click", exportarLogs);
+
+
+function exportarLogs() {
+  if (logEventos.length === 0) {
+    alert("Nenhum evento registrado.");
+    return;
+  }
+
+  const dados = JSON.stringify(logEventos, null, 2);
+  const blob = new Blob([dados], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `logs_dino_${Date.now()}.json`;
+  a.click();
+
+  URL.revokeObjectURL(url);
+}

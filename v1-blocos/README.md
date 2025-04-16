@@ -1,5 +1,41 @@
 # Histórico da Versão v1-blocos
 
+## 🔹 v2.0 – Instrumentação e Exportação de Logs (Analytics)
+
+### 📅 Data: 16/04/2025
+
+### Objetivo
+Criar um sistema de coleta de dados estruturado para futuras análises de desempenho, visualização de decisões e base para papers ou treinamentos supervisionados.
+
+### Implementado
+- Array `logEventos[]` que registra ações da IA e do Jogador.
+- Logs para:
+  - 🦘 Pulos (tempo, distância, agente, velocidade)
+  - 💥 Colisões (quando ocorrem, com contexto)
+  - 🧱 Obstáculos evitados (registrado via movimento)
+- Exportação direta via botão "📤 Exportar Logs"
+  - Gera um `.json` com todos os eventos da sessão atual
+  - Estrutura padronizada para análise futura
+
+### Exemplo de evento registrado
+```json
+{
+  "tempo": 27,
+  "evento": "pulo",
+  "agente": "IA",
+  "distancia": 113,
+  "velocidade": 5.2
+}
+```
+
+### Uso sugerido
+- Coletar séries temporais de ações
+- Analisar decisões erradas ou atrasadas
+- Treinar modelos supervisionados com base nos logs
+- Validar agentes RL contra baseline heurístico
+
+---
+
 ## 🔹 v1.3 — IA Heurística Aprimorada + Instrumentação de Logs
 
 ### 📅 Data: 16/04/2025
