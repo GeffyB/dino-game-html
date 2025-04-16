@@ -1,11 +1,11 @@
 // ------------------------------------------------------------
 // DinoFauro 🦖 – Módulo Principal do Jogo
-// Versão: v1-blocos | Organização + Comentários Didáticos ✅
+// Versão: v1.2-random | Obstáculos com movimento e spawn controlados via JS
 // ------------------------------------------------------------
 
 // ========== [VARIÁVEIS GLOBAIS] ========== //
 
-// Elementos do DOM (compartilhado com agent.js)
+// Elementos do DOM
 window.dinofauro = document.getElementById("dinofauro");
 window.espinhudo = document.getElementById("espinhudo");
 
@@ -19,17 +19,21 @@ let modoIA = true;
 let jogoEmAndamento = false;
 let cronometroID = null;
 
+// Variáveis do espinhudo (novo controle manual)
+let posicaoEspinhudo = 800; // posição inicial (fora da tela)
+let velocidadeEspinhudo = 4; // pode aumentar com o tempo
+let intervaloSpawn = 1200;  // delay entre obstáculos
+
 
 // ========== [FUNÇÕES DE MECÂNICA DE JOGO] ========== //
 
-// Faz o dinofauro pular manualmente (modo jogador)
 function dinofauroPula() {
   if (pulandoNoAr) return;
+  pulandoNoAr = true;
   pulosRealizados++;
   document.getElementById("pulos").innerText = `🦘 Pulos: ${pulosRealizados}`;
-  pulandoNoAr = true;
-  let altura = 0;
 
+  let altura = 0;
   const puloAlturaMax = 100;
   const velocidadeSubida = 4;
   const velocidadeDescida = 3;
@@ -119,6 +123,31 @@ function iniciarContadorDeTempo() {
 }
 
 
+// ========== [MOVIMENTO DO OBSTÁCULO COM RANDOMIZAÇÃO – v1.2] ========== //
+
+function iniciarEspinhudo() {
+  posicaoEspinhudo = 800 + Math.random() * 400;
+  velocidadeEspinhudo = 4 + Math.random() * 2;
+  espinhudo.style.left = `${posicaoEspinhudo}px`;
+  moverEspinhudo();
+}
+
+function moverEspinhudo() {
+  if (!jogoEmAndamento || houveColisao) return;
+
+  posicaoEspinhudo -= velocidadeEspinhudo;
+  espinhudo.style.left = `${posicaoEspinhudo}px`;
+
+  if (posicaoEspinhudo < -50) {
+    obstaculosEvitados++;
+    document.getElementById("evitados").innerText = `🧱 Evitados: ${obstaculosEvitados}`;
+    setTimeout(iniciarEspinhudo, 500 + Math.random() * intervaloSpawn);
+  } else {
+    requestAnimationFrame(moverEspinhudo);
+  }
+}
+
+
 // ========== [INICIALIZAÇÃO E CICLO DE JOGO] ========== //
 
 function iniciarJogo() {
@@ -142,17 +171,16 @@ function iniciarJogo() {
     ativarTecladoJogador();
   }
 
-  espinhudo.style.animation = "none";
-  void espinhudo.offsetWidth;
-  espinhudo.style.animation = "";
-  espinhudo.classList.remove("pausado");
+  setTimeout(iniciarEspinhudo, 1000); // Aguarda 1 segundo antes de lançar o obstáculo
+
 }
 
 function resetarJogo() {
   jogoEmAndamento = false;
   houveColisao = false;
 
-  espinhudo.classList.add("pausado");
+  espinhudo.style.left = "800px"; // reset visual do obstáculo
+
   document.getElementById("status").innerText = "🕹️ Aguardando início...";
 
   document.removeEventListener("keydown", aoPressionarTecla);
@@ -205,11 +233,4 @@ document.getElementById("botao-start").addEventListener("click", () => {
 document.getElementById("botao-parar").addEventListener("click", () => {
   resetarJogo();
   document.getElementById("status").innerText = "⏸️ Jogo pausado.";
-});
-
-espinhudo.addEventListener("animationiteration", () => {
-  if (jogoEmAndamento && !houveColisao) {
-    obstaculosEvitados++;
-    document.getElementById("evitados").innerText = `🧱 Evitados: ${obstaculosEvitados}`;
-  }
 });

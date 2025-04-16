@@ -1,5 +1,33 @@
 # Histórico da Versão v1-blocos
 
+## 🔹 v1.2 — Obstáculos com Comportamento Randomizado (spawn e velocidade)
+
+### 📅 Data: 16/04/2025
+
+### Objetivo
+Deixar o jogo menos previsível e mais desafiador ao adicionar:
+- Obstáculos com **posição de spawn aleatória**
+- Velocidade variável de movimento
+- Intervalos dinâmicos entre espinhudos
+
+### Implementado
+- Substituição da `animation` CSS por controle via `requestAnimationFrame`
+- Novo sistema de movimentação do `espinhudo` com `style.left`
+- Aleatoriedade aplicada na posição de origem e velocidade de cada obstáculo
+- Delay de 1 segundo antes do primeiro espinhudo para dar tempo de reação à IA
+- Contador de obstáculos evitados mantido e atualizado no novo loop
+
+### Observações
+- A IA heurística ainda funciona, mas com taxa de sucesso inicial ~75%
+- Essa etapa cria a base necessária para validação futura de agentes aprendizes (RL)
+- Pode ser necessário ajustar `distância` e `tempoDesdeUltimoPulo` para maior precisão
+
+### Compatibilidade
+- Modo Jogador permanece funcional
+- Modo IA adaptado ao novo sistema com sucesso parcial
+
+---
+
 ## 🔹 v1.1 — HUD com Métricas Dinâmicas (pulos e evitados)
 
 ### Data: 16/04/2025
