@@ -1,13 +1,12 @@
 // ------------------------------------------------------------
 // DinoFauro 🦖 – Módulo Principal do Jogo
-// Versão: v1.2-random | Obstáculos com movimento e spawn controlados via JS
+// Versão: v2.1-func | Suporte a múltiplos obstáculos
 // ------------------------------------------------------------
 
 // ========== [VARIÁVEIS GLOBAIS] ========== //
 
 // Elementos do DOM
 window.dinofauro = document.getElementById("dinofauro");
-window.espinhudo = document.getElementById("espinhudo");
 
 // Estados de controle
 let pulandoNoAr = false;
@@ -19,13 +18,9 @@ let modoIA = true;
 let jogoEmAndamento = false;
 let cronometroID = null;
 
-// Variáveis do espinhudo (novo controle manual)
-let posicaoEspinhudo = 800; // posição inicial (fora da tela)
-let velocidadeEspinhudo = 4; // pode aumentar com o tempo
-let intervaloSpawn = 1200;  // delay entre obstáculos
-
-let logEventos = []; // Novo: armazena eventos para exportação e análise
-
+let logEventos = [];
+let obstaculosAtivos = [];
+let intervaloSpawn = 1200;
 
 // ========== [FUNÇÕES DE MECÂNICA DE JOGO] ========== //
 
@@ -35,12 +30,17 @@ function dinofauroPula() {
   pulosRealizados++;
   document.getElementById("pulos").innerText = `🦘 Pulos: ${pulosRealizados}`;
 
+  const obstaculoMaisProximo = obterObstaculoMaisProximo();
+  const distancia = obstaculoMaisProximo
+    ? Math.floor(obstaculoMaisProximo.getBoundingClientRect().left - dinofauro.getBoundingClientRect().left)
+    : -1;
+
   logEventos.push({
     tempo: tempoDeSobrevivencia,
     evento: "pulo",
     agente: "Jogador",
-    distancia: Math.floor(espinhudo.offsetLeft - dinofauro.offsetLeft),
-    velocidade: velocidadeEspinhudo
+    distancia,
+    velocidade: obstaculoMaisProximo ? obstaculoMaisProximo.dataset.velocidade : 0
   });
 
   let altura = 0;
@@ -67,8 +67,7 @@ function dinofauroPula() {
   }, 10);
 }
 
-
-// ========== [FUNÇÕES DE MODO JOGADOR] ========== //
+// ========== [MODO JOGADOR] ========== //
 
 function ativarTecladoJogador() {
   document.addEventListener("keydown", aoPressionarTecla);
@@ -80,8 +79,10 @@ function aoPressionarTecla(event) {
   }
 }
 
+// ========== [IA] ========== //
 
-// ========== [FUNÇÕES DE MODO IA] ========== //
+let tempoDesdeUltimoPulo = 999;
+let oDinoTaPulando = false;
 
 function iniciarIA() {
   tempoDesdeUltimoPulo = 999;
@@ -92,27 +93,60 @@ function iniciarIA() {
       return;
     }
 
-    const distancia = espinhudo.offsetLeft - dinofauro.offsetLeft;
-    const distanciaLimite = 90 + velocidadeEspinhudo * 2.5; // IA ajusta distância com base na velocidade e tempo de reação
+    const obstaculo = obterObstaculoMaisProximo();
+    if (!obstaculo) return;
 
-if (
-  distancia < distanciaLimite &&
-  distancia > 0 &&
-  !oDinoTaPulando &&
-  tempoDesdeUltimoPulo > 15
-) {
-  console.log(`[IA] Pulando com distância: ${distancia.toFixed(2)}, limite: ${distanciaLimite.toFixed(2)}, velocidade: ${velocidadeEspinhudo.toFixed(2)}`);
-  
-  fazerDinoDarAquelaPulada();
-  tempoDesdeUltimoPulo = 0;
-}                       
+    const distancia = obstaculo.getBoundingClientRect().left - dinofauro.getBoundingClientRect().left;
+    const velocidade = parseFloat(obstaculo.dataset.velocidade);
+    const distanciaLimite = 90 + velocidade * 2.5;
+
+    if (distancia < distanciaLimite && distancia > 0 && !oDinoTaPulando && tempoDesdeUltimoPulo > 15) {
+      fazerDinoDarAquelaPulada(distancia, velocidade);
+      tempoDesdeUltimoPulo = 0;
+    }
 
     tempoDesdeUltimoPulo++;
   }, 20);
 }
 
+function fazerDinoDarAquelaPulada(distancia, velocidade) {
+  oDinoTaPulando = true;
+  pulosRealizados++;
+  document.getElementById("pulos").innerText = `🦘 Pulos: ${pulosRealizados}`;
 
-// ========== [CONTADOR DE TEMPO] ========== //
+  logEventos.push({
+    tempo: tempoDeSobrevivencia,
+    evento: "pulo",
+    agente: "IA",
+    distancia,
+    velocidade
+  });
+
+  let altura = 0;
+  const puloAlturaMax = 100;
+  const velocidadeSubida = 4;
+  const velocidadeDescida = 3;
+
+  const subir = setInterval(() => {
+    if (altura >= puloAlturaMax) {
+      clearInterval(subir);
+      const descer = setInterval(() => {
+        if (altura <= 0) {
+          clearInterval(descer);
+          oDinoTaPulando = false;
+        } else {
+          altura -= velocidadeDescida;
+          dinofauro.style.bottom = `${altura}px`;
+        }
+      }, 10);
+    } else {
+      altura += velocidadeSubida;
+      dinofauro.style.bottom = `${altura}px`;
+    }
+  }, 10);
+}
+
+// ========== [TEMPO] ========== //
 
 function iniciarContadorDeTempo() {
   if (cronometroID) clearInterval(cronometroID);
@@ -136,41 +170,51 @@ function iniciarContadorDeTempo() {
   }, 1000);
 }
 
+// ========== [OBSTÁCULOS] ========== //
 
-// ========== [MOVIMENTO DO OBSTÁCULO COM RANDOMIZAÇÃO – v1.2] ========== //
+function criarObstaculo() {
+  const obstaculo = document.createElement("div");
+  obstaculo.classList.add("obstaculo");
 
-function iniciarEspinhudo() {
-  posicaoEspinhudo = 800 + Math.random() * 400;
-  velocidadeEspinhudo = 4 + Math.random() * 2;
-  espinhudo.style.left = `${posicaoEspinhudo}px`;
-  moverEspinhudo();
+  const velocidade = 4 + Math.random() * 2;
+  const posicaoInicial = 800 + Math.random() * 300;
+
+  obstaculo.style.left = `${posicaoInicial}px`;
+  obstaculo.dataset.velocidade = velocidade;
+
+  document.getElementById("game-container").appendChild(obstaculo);
+  obstaculosAtivos.push(obstaculo);
 }
 
-function moverEspinhudo() {
+function moverObstaculos() {
   if (!jogoEmAndamento || houveColisao) return;
 
-  posicaoEspinhudo -= velocidadeEspinhudo;
-  espinhudo.style.left = `${posicaoEspinhudo}px`;
+  obstaculosAtivos.forEach((obstaculo, index) => {
+    let leftAtual = parseFloat(obstaculo.style.left);
+    let velocidade = parseFloat(obstaculo.dataset.velocidade);
 
-  if (posicaoEspinhudo < -50) {
-    obstaculosEvitados++;
-    document.getElementById("evitados").innerText = `🧱 Evitados: ${obstaculosEvitados}`;
-    
-    logEventos.push({
-      tempo: tempoDeSobrevivencia,
-      evento: "evitado",
-      agente: modoIA ? "IA" : "Jogador",
-      velocidade: velocidadeEspinhudo
-    });
-    
-    setTimeout(iniciarEspinhudo, 500 + Math.random() * intervaloSpawn);
-  } else {
-    requestAnimationFrame(moverEspinhudo);
-  }
+    obstaculo.style.left = `${leftAtual - velocidade}px`;
+
+    if (leftAtual < -50) {
+      obstaculo.remove();
+      obstaculosAtivos.splice(index, 1);
+      obstaculosEvitados++;
+      document.getElementById("evitados").innerText = `🧱 Evitados: ${obstaculosEvitados}`;
+      logEventos.push({ tempo: tempoDeSobrevivencia, evento: "evitado", agente: modoIA ? "IA" : "Jogador", velocidade });
+    }
+  });
+
+  requestAnimationFrame(moverObstaculos);
 }
 
+function obterObstaculoMaisProximo() {
+  const dinoBox = dinofauro.getBoundingClientRect();
+  return obstaculosAtivos
+    .filter(obs => obs.getBoundingClientRect().left > dinoBox.left)
+    .sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left)[0];
+}
 
-// ========== [INICIALIZAÇÃO E CICLO DE JOGO] ========== //
+// ========== [CICLO DO JOGO] ========== //
 
 function iniciarJogo() {
   houveColisao = false;
@@ -179,6 +223,7 @@ function iniciarJogo() {
   tempoDeSobrevivencia = 0;
   pulosRealizados = 0;
   obstaculosEvitados = 0;
+  obstaculosAtivos = [];
 
   document.getElementById("tempo").innerText = `⏱️ Tempo: 00:00:00`;
   document.getElementById("pulos").innerText = `🦘 Pulos: 0`;
@@ -186,70 +231,66 @@ function iniciarJogo() {
   document.getElementById("status").innerText = `🎮 Em jogo...`;
 
   iniciarContadorDeTempo();
+  if (modoIA) iniciarIA();
+  else ativarTecladoJogador();
 
-  if (modoIA) {
-    iniciarIA();
-  } else {
-    ativarTecladoJogador();
-  }
-
-  setTimeout(iniciarEspinhudo, 1000); // Aguarda 1 segundo antes de lançar o obstáculo
-
+  setInterval(criarObstaculo, intervaloSpawn);
+  requestAnimationFrame(moverObstaculos);
 }
 
 function resetarJogo() {
   jogoEmAndamento = false;
   houveColisao = false;
-
-  espinhudo.style.left = "800px"; // reset visual do obstáculo
+  obstaculosAtivos.forEach(obs => obs.remove());
+  obstaculosAtivos = [];
 
   document.getElementById("status").innerText = "🕹️ Aguardando início...";
-
   document.removeEventListener("keydown", aoPressionarTecla);
 
   if (cronometroID) {
     clearInterval(cronometroID);
     cronometroID = null;
   }
+
   document.getElementById("botao-start").disabled = false;
 }
 
-
-// ========== [COLISÃO E LOOP PRINCIPAL] ========== //
+// ========== [COLISÃO] ========== //
 
 function checarColisao() {
   if (houveColisao) return;
 
-  const dinofauroBox = dinofauro.getBoundingClientRect();
-  const espinhudoBox = espinhudo.getBoundingClientRect();
+  const dinoBox = dinofauro.getBoundingClientRect();
+  for (const obstaculo of obstaculosAtivos) {
+    const obsBox = obstaculo.getBoundingClientRect();
+    if (
+      dinoBox.right > obsBox.left + 5 &&
+      dinoBox.left < obsBox.right - 5 &&
+      dinoBox.bottom > obsBox.top
+    ) {
+      houveColisao = true;
+      jogoEmAndamento = false;
 
-  if (
-    dinofauroBox.right > espinhudoBox.left + 5 &&
-    dinofauroBox.left < espinhudoBox.right - 5 &&
-    dinofauroBox.bottom > espinhudoBox.top
-  ) {
-    houveColisao = true;
-    jogoEmAndamento = false;
+      logEventos.push({
+        tempo: tempoDeSobrevivencia,
+        evento: "colisao",
+        agente: modoIA ? "IA" : "Jogador",
+        distancia: Math.floor(obsBox.left - dinoBox.left),
+        velocidade: obstaculo.dataset.velocidade
+      });
 
-    logEventos.push({
-      tempo: tempoDeSobrevivencia,
-      evento: "colisao",
-      agente: modoIA ? "IA" : "Jogador",
-      distancia: Math.floor(espinhudo.offsetLeft - dinofauro.offsetLeft),
-      velocidade: velocidadeEspinhudo
-    });
-
-    document.getElementById("status").innerText = "💀 Game Over!";
-    document.removeEventListener("keydown", aoPressionarTecla);
-    alert("💀 Game Over! O Espinhudo venceu essa rodada...");
-    resetarJogo();
+      document.getElementById("status").innerText = "💀 Game Over!";
+      document.removeEventListener("keydown", aoPressionarTecla);
+      alert("💀 Game Over! O Espinhudo venceu essa rodada...");
+      resetarJogo();
+      break;
+    }
   }
 }
 
 setInterval(checarColisao, 10);
 
-
-// ========== [INTERAÇÃO COM A INTERFACE] ========== //
+// ========== [INTERFACE] ========== //
 
 window.onload = () => {
   document.getElementById("status").innerText = "🕹️ Aguardando início...";
@@ -268,7 +309,6 @@ document.getElementById("botao-parar").addEventListener("click", () => {
 });
 
 document.getElementById("botao-exportar").addEventListener("click", exportarLogs);
-
 
 function exportarLogs() {
   if (logEventos.length === 0) {
