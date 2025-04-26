@@ -33,6 +33,24 @@ Este repositório contém a construção incremental de uma IA treinada para jog
 
 ---
 
+## Histórico de Versões
+
+| Versão        | Descrição                                                  | Status          |
+|---------------|-------------------------------------------------------------|-----------------|
+| v1.0          | MVP inicial com blocos, heurística simples                  | ✅ Concluído    |
+| v1.1          | HUD de Pulos e Obstáculos evitados                          | ✅ Concluído    |
+| v1.2          | Obstáculos com spawn e velocidade randomizada               | ✅ Concluído    |
+| v1.3          | Instrumentação de logs para análise de desempenho           | ✅ Concluído    |
+| v2.0          | Exportação de logs para `.json`                             | ✅ Concluído    |
+| v2.1          | Tentativa com sprites visuais (arquivada)                   | ❌ Arquivado    |
+| v2.3-balance  | Velocidade global uniforme, múltiplos obstáculos e abaixar  | ✅ Em andamento |
+
+---
+
+> Observação: As versões seguem um formato progressivo baseado em milestones de funcionalidade.  
+> Versões experimentais ou arquivadas (como v2.1) são documentadas mas não evoluídas.
+
+
 ## 👤 Autor
 
 Criado e mantido por [GeffyB](https://github.com/GeffyB), com variáveis inesperadas, muitos erros e código quase limpo.

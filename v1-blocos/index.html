@@ -3,14 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DinoFauro 🦖</title>
+  <title>DinoFauro 🦖 - Projeto IA</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
+  <!-- Título e Painel Superior -->
+  <header id="header">
+    <h1>DinoFauro 🦖 - Projeto IA</h1>
+    <div id="painel-controle">
+      <select id="modo-jogo">
+        <option value="ia">Modo IA</option>
+        <option value="jogador">Modo Jogador</option>
+      </select>
+      <button id="botao-start">▶️ Iniciar Jogo</button>
+      <button id="botao-parar">⏹️ Parar Jogo</button>
+      <button id="botao-exportar">📤 Exportar Logs</button>
+    </div>
+  </header>
+
+  <!-- Área de Jogo -->
   <div id="game-container">
     <div id="dinofauro"></div>
   </div>
 
+  <!-- HUD (Métricas) -->
   <div id="hud">
     <span id="tempo">⏱️ Tempo: 00:00:00</span>
     <span id="pulos">🦘 Pulos: 0</span>
@@ -18,16 +35,7 @@
     <span id="status">🕹️ Aguardando início...</span>
   </div>
 
-  <div id="painel-controle">
-    <select id="modo-jogo">
-      <option value="ia">Modo IA</option>
-      <option value="jogador">Modo Jogador</option>
-    </select>
-    <button id="botao-start">▶️ Iniciar Jogo</button>
-    <button id="botao-parar">⏹️ Parar Jogo</button>
-    <button id="botao-exportar">📤 Exportar Logs</button>
-  </div>
-
   <script src="game.js"></script>
+
 </body>
 </html>
