@@ -1,45 +1,69 @@
-//  IA Heurística com Logs para v2.0-analytics
+// ------------------------------------------------------------
+// agent.js — DinoFauro IA 🤖🦖
+// Versão: v2.5-finalmerge | Correção Final de Saltos e Abaixar
+// ------------------------------------------------------------
 
+// ========== [ESTADOS DE CONTROLE DA IA] ========== //
+
+let tempoDesdeUltimaAcao = 999;
 let oDinoTaPulando = false;
-let tempoDesdeUltimoPulo = 999;
+let oDinoTaAbaixando = false;
+
+// ========== [LOOP PRINCIPAL DE DECISÃO DA IA] ========== //
+
+function iniciarIA() {
+  tempoDesdeUltimaAcao = 999;
+
+  const loopIA = setInterval(() => {
+    if (houveColisao || !jogoEmAndamento || !modoIA) {
+      clearInterval(loopIA);
+      return;
+    }
+
+    const obstaculoMaisProximo = obstaculosAtivos[0];
+    if (!obstaculoMaisProximo) return;
+
+    const distancia = obstaculoMaisProximo.offsetLeft - dinofauro.offsetLeft;
+    const tipo = obstaculoMaisProximo.classList.contains("obstaculo-voador") ? "voador" : "chao";
+
+    // 🛠 Distância proporcional para saltos corretos
+    const distanciaLimite = 25 * velocidadeGlobal;
+
+    if (
+      distancia < distanciaLimite &&
+      distancia > 0 &&
+      tempoDesdeUltimaAcao > 15 &&
+      !oDinoTaPulando &&
+      !oDinoTaAbaixando
+    ) {
+      if (tipo === "voador") {
+        fazerDinoDarUmaAbaixada();
+      } else {
+        fazerDinoDarAquelaPulada();
+      }
+      tempoDesdeUltimaAcao = 0;
+    }
+
+    tempoDesdeUltimaAcao++;
+  }, 20);
+}
+
+// ========== [AÇÕES: PULAR OU ABAIXAR] ========== //
 
 function fazerDinoDarAquelaPulada() {
-  if (oDinoTaPulando || houveColisao || !jogoEmAndamento) return;
+  if (pulandoNoAr || houveColisao || !jogoEmAndamento) return;
+  dinofauroPula();
+}
 
-  oDinoTaPulando = true;
+function fazerDinoDarUmaAbaixada() {
+  if (pulandoNoAr || houveColisao || !jogoEmAndamento) return;
+  
+  oDinoTaAbaixando = true;
+  dinofauroAbaixa(true);
 
-  pulosRealizados++;
-  document.getElementById("pulos").innerText = `🦘 Pulos: ${pulosRealizados}`;
-
-  // Novo: log estruturado para análise (v2.0)
-  logEventos.push({
-    tempo: tempoDeSobrevivencia,
-    evento: "pulo",
-    agente: "IA",
-    distancia: Math.floor(espinhudo.offsetLeft - dinofauro.offsetLeft),
-    velocidade: velocidadeEspinhudo
-  });
-
-  let altura = 0;
-  const puloAlturaMax = 100;
-  const velocidadeSubida = 4;
-  const velocidadeDescida = 3;
-
-  const subir = setInterval(() => {
-    if (altura >= puloAlturaMax) {
-      clearInterval(subir);
-      const descer = setInterval(() => {
-        if (altura <= 0) {
-          clearInterval(descer);
-          oDinoTaPulando = false;
-        } else {
-          altura -= velocidadeDescida;
-          dinofauro.style.bottom = `${altura}px`;
-        }
-      }, 10);
-    } else {
-      altura += velocidadeSubida;
-      dinofauro.style.bottom = `${altura}px`;
-    }
-  }, 10);
+  // 🛠 Mantém abaixado por 400ms e depois levanta
+  setTimeout(() => {
+    dinofauroAbaixa(false);
+    oDinoTaAbaixando = false;
+  }, 400);
 }

@@ -1,40 +1,50 @@
+<!-- ------------------------------------------------------------ -->
+<!-- index.html — DinoFauro 🦖 -->
+<!-- Versão: v2.5 | Suporte a Obstáculos Voadores -->
+<!-- ------------------------------------------------------------ -->
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DinoFauro 🦖 - Projeto IA</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DinoFauro 🦖</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-  <!-- Título e Painel Superior -->
-  <header id="header">
-    <h1>DinoFauro 🦖 - Projeto IA</h1>
-    <div id="painel-controle">
-      <select id="modo-jogo">
-        <option value="ia">Modo IA</option>
-        <option value="jogador">Modo Jogador</option>
-      </select>
-      <button id="botao-start">▶️ Iniciar Jogo</button>
-      <button id="botao-parar">⏹️ Parar Jogo</button>
-      <button id="botao-exportar">📤 Exportar Logs</button>
-    </div>
-  </header>
+  <!-- ========== TÍTULO ========== -->
+  <h1 id="titulo-jogo">DinoFauro 🦖</h1>
 
-  <!-- Área de Jogo -->
-  <div id="game-container">
-    <div id="dinofauro"></div>
-  </div>
-
-  <!-- HUD (Métricas) -->
+  <!-- ========== HUD DE JOGO ========== -->
   <div id="hud">
-    <span id="tempo">⏱️ Tempo: 00:00:00</span>
-    <span id="pulos">🦘 Pulos: 0</span>
-    <span id="evitados">🧱 Evitados: 0</span>
+    <span id="tempo">⏱️ Tempo: 00:00:00</span> |
+    <span id="pulos">🦘 Pulos: 0</span> |
+    <span id="evitados">🧱 Evitados: 0</span> |
     <span id="status">🕹️ Aguardando início...</span>
   </div>
 
+  <!-- ========== ÁREA DE JOGO ========== -->
+  <div id="game-container">
+    <div id="dinofauro"></div>
+    <div id="overlay-gameover">💀 Game Over!</div>
+    <!-- Obstáculos dinâmicos serão adicionados aqui via JavaScript -->
+  </div>
+
+  <!-- ========== PAINEL DE CONTROLE ========== -->
+  <div id="painel-botoes">
+    <button id="botao-start">▶️ Iniciar Jogo</button>
+    <button id="botao-parar">⏸️ Parar Jogo</button>
+    <select id="modo-jogo">
+      <option value="jogador">🎮 Jogador</option>
+      <option value="ia" selected>🤖 IA</option> <!-- ✅ Agora IA é selecionado como padrão -->
+    </select>
+    <button id="botao-exportar">📤 Exportar Logs</button>
+  </div>
+
+  <!-- ========== IMPORTAÇÃO DE SCRIPTS ========== -->
+  <script src="agent.js"></script>
   <script src="game.js"></script>
 
 </body>

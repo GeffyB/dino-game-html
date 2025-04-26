@@ -1,13 +1,13 @@
 // ------------------------------------------------------------
 // DinoFauro 🦖 – Módulo Principal do Jogo
-// Versão: v2.2-duck | Suporte a abaixar + múltiplos obstáculos
-// Versão: v2.3-balance | Velocidade global uniforme nos obstáculos
+// Versão: v2.5-fix | Correções de colisão e spawn de obstáculos voadores
 // ------------------------------------------------------------
 
 // ========== [VARIÁVEIS GLOBAIS] ========== //
 
-// Elementos do DOM
-window.dinofauro = document.getElementById("dinofauro");
+// Elementos DOM
+const dinofauro = document.getElementById("dinofauro");
+const overlayGameOver = document.getElementById("overlay-gameover");
 
 // Estados de controle
 let pulandoNoAr = false;
@@ -19,11 +19,14 @@ let houveColisao = false;
 let modoIA = true;
 let jogoEmAndamento = false;
 let cronometroID = null;
-let intervaloSpawn = 1200;
 
-// Controle de obstáculos
+// Obstáculos
 let obstaculosAtivos = [];
-let velocidadeGlobalObstaculos = 4; // Novo: velocidade inicial global dos obstáculos
+let velocidadeGlobal = 4;
+let intervaloSpawn = 1500;
+let intervaloSpawnID = null;
+
+// Logs
 let logEventos = [];
 
 // ========== [FUNÇÕES DE MECÂNICA DE JOGO] ========== //
@@ -31,15 +34,10 @@ let logEventos = [];
 function dinofauroPula() {
   if (pulandoNoAr || abaixando) return;
   pulandoNoAr = true;
-  abaixando = false;
   pulosRealizados++;
   document.getElementById("pulos").innerText = `🦘 Pulos: ${pulosRealizados}`;
 
-  logEventos.push({
-    tempo: tempoDeSobrevivencia,
-    evento: "pulo",
-    agente: modoIA ? "IA" : "Jogador",
-  });
+  logEventos.push({ tempo: tempoDeSobrevivencia, evento: "pulo", agente: modoIA ? "IA" : "Jogador" });
 
   let altura = 0;
   const puloAlturaMax = 100;
@@ -53,6 +51,7 @@ function dinofauroPula() {
         if (altura <= 0) {
           clearInterval(descer);
           pulandoNoAr = false;
+          dinofauro.style.bottom = `0px`;
         } else {
           altura -= velocidadeDescida;
           dinofauro.style.bottom = `${altura}px`;
@@ -65,27 +64,14 @@ function dinofauroPula() {
   }, 10);
 }
 
-function dinofauroAbaixa() {
-  if (pulandoNoAr || abaixando) return;
-  abaixando = true;
-  dinofauro.style.height = "20px";
+function dinofauroAbaixa(ativo) {
+  if (!jogoEmAndamento || pulandoNoAr) return;
+  abaixando = ativo;
+  dinofauro.style.height = ativo ? "30px" : "60px";
   dinofauro.style.bottom = "0px";
-
-  logEventos.push({
-    tempo: tempoDeSobrevivencia,
-    evento: "abaixar",
-    agente: modoIA ? "IA" : "Jogador",
-  });
 }
 
-function dinofauroLevanta() {
-  if (abaixando) {
-    dinofauro.style.height = "40px";
-    abaixando = false;
-  }
-}
-
-// ========== [FUNÇÕES DE MODO JOGADOR] ========== //
+// ========== [FUNÇÕES DE JOGADOR HUMANO] ========== //
 
 function ativarTecladoJogador() {
   document.addEventListener("keydown", aoPressionarTecla);
@@ -93,101 +79,36 @@ function ativarTecladoJogador() {
 }
 
 function aoPressionarTecla(event) {
-  if (!jogoEmAndamento || houveColisao) return;
-
-  if (event.code === "Space") {
-    dinofauroPula();
-  } else if (event.code === "ArrowDown") {
-    dinofauroAbaixa();
+  if (!houveColisao && jogoEmAndamento) {
+    if (event.code === "Space" && !pulandoNoAr) dinofauroPula();
+    if (event.code === "ArrowDown") dinofauroAbaixa(true);
   }
 }
 
 function aoSoltarTecla(event) {
-  if (!jogoEmAndamento || houveColisao) return;
-
-  if (event.code === "ArrowDown") {
-    dinofauroLevanta();
-  }
+  if (event.code === "ArrowDown") dinofauroAbaixa(false);
 }
 
-// ========== [FUNÇÕES DE MODO IA] ========== //
-
-function iniciarIA() {
-  tempoDesdeUltimoPulo = 999;
-  oDinoTaPulando = false;
-
-  const loopIA = setInterval(() => {
-    if (houveColisao || !jogoEmAndamento || !modoIA) {
-      clearInterval(loopIA);
-      return;
-    }
-
-    let obstaculoMaisProximo = obstaculosAtivos.find(obs => {
-      const left = parseFloat(obs.style.left);
-      return left > 50;
-    });
-
-    if (!obstaculoMaisProximo) return;
-
-    const distancia = parseFloat(obstaculoMaisProximo.style.left) - 50;
-    const velocidade = velocidadeGlobalObstaculos;
-    const distanciaLimite = 90 + velocidade * 2.5;
-
-    if (
-      distancia < distanciaLimite &&
-      distancia > 0 &&
-      !oDinoTaPulando &&
-      tempoDesdeUltimoPulo > 15
-    ) {
-      dinofauroPula();
-      tempoDesdeUltimoPulo = 0;
-    }
-
-    tempoDesdeUltimoPulo++;
-  }, 20);
-}
-
-// ========== [CONTADOR DE TEMPO] ========== //
-
-function iniciarContadorDeTempo() {
-  if (cronometroID) clearInterval(cronometroID);
-  tempoDeSobrevivencia = 0;
-
-  const formatarTempo = (s) => {
-    const h = String(Math.floor(s / 3600)).padStart(2, '0');
-    const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
-    const seg = String(s % 60).padStart(2, '0');
-    return `${h}:${m}:${seg}`;
-  };
-
-  cronometroID = setInterval(() => {
-    if (houveColisao || !jogoEmAndamento) {
-      clearInterval(cronometroID);
-      cronometroID = null;
-    } else {
-      tempoDeSobrevivencia++;
-      document.getElementById("tempo").innerText = `⏱️ Tempo: ${formatarTempo(tempoDeSobrevivencia)}`;
-
-      // Aumenta dificuldade a cada 20 segundos
-      if (tempoDeSobrevivencia % 20 === 0) {
-        velocidadeGlobalObstaculos += 0.5;
-      }
-    }
-  }, 1000);
-}
-
-// ========== [MOVIMENTO DOS OBSTÁCULOS] ========== //
+// ========== [OBSTÁCULOS] ========== //
 
 function criarObstaculo() {
+  if (!jogoEmAndamento || houveColisao) return;
+
   const obstaculo = document.createElement("div");
-  obstaculo.classList.add("obstaculo");
+  const tipoAleatorio = Math.random();
 
-  const velocidade = velocidadeGlobalObstaculos; // Agora todos iguais
-  const posicaoInicial = 800 + Math.random() * 300;
+  if (tipoAleatorio < 0.7) {
+    obstaculo.classList.add("obstaculo");
+    obstaculo.style.bottom = "0px";
+  } else if (tipoAleatorio < 0.9) {
+    obstaculo.classList.add("obstaculo-baixo");
+    obstaculo.style.bottom = "0px";
+  } else {
+    obstaculo.classList.add("obstaculo-voador");
+    obstaculo.style.bottom = `${70 + Math.random() * 30}px`;
+  }
 
-  obstaculo.style.left = `${posicaoInicial}px`;
-  obstaculo.dataset.velocidade = velocidade;
-
+  obstaculo.style.left = "800px";
   document.getElementById("game-container").appendChild(obstaculo);
   obstaculosAtivos.push(obstaculo);
 }
@@ -197,121 +118,136 @@ function moverObstaculos() {
 
   obstaculosAtivos.forEach((obstaculo, index) => {
     let leftAtual = parseFloat(obstaculo.style.left);
-    let velocidade = parseFloat(obstaculo.dataset.velocidade);
-
-    obstaculo.style.left = `${leftAtual - velocidade}px`;
+    obstaculo.style.left = `${leftAtual - velocidadeGlobal}px`;
 
     if (leftAtual < -50) {
       obstaculo.remove();
       obstaculosAtivos.splice(index, 1);
-
       obstaculosEvitados++;
       document.getElementById("evitados").innerText = `🧱 Evitados: ${obstaculosEvitados}`;
-
-      logEventos.push({
-        tempo: tempoDeSobrevivencia,
-        evento: "evitado",
-        agente: modoIA ? "IA" : "Jogador",
-        velocidade
-      });
     }
   });
 
   requestAnimationFrame(moverObstaculos);
 }
 
-// ========== [INICIALIZAÇÃO E CICLO DE JOGO] ========== //
+// ========== [CONTADOR DE TEMPO E PROGRESSÃO] ========== //
+
+function iniciarContadorDeTempo() {
+  if (cronometroID) clearInterval(cronometroID);
+  tempoDeSobrevivencia = 0;
+
+  cronometroID = setInterval(() => {
+    if (houveColisao || !jogoEmAndamento) {
+      clearInterval(cronometroID);
+      cronometroID = null;
+    } else {
+      tempoDeSobrevivencia++;
+      const h = String(Math.floor(tempoDeSobrevivencia / 3600)).padStart(2, '0');
+      const m = String(Math.floor((tempoDeSobrevivencia % 3600) / 60)).padStart(2, '0');
+      const s = String(tempoDeSobrevivencia % 60).padStart(2, '0');
+      document.getElementById("tempo").innerText = `⏱️ Tempo: ${h}:${m}:${s}`;
+
+      if (tempoDeSobrevivencia % 10 === 0) velocidadeGlobal += 0.2;
+    }
+  }, 1000);
+}
+
+// ========== [CICLO PRINCIPAL DO JOGO] ========== //
 
 function iniciarJogo() {
   houveColisao = false;
   jogoEmAndamento = true;
-  obstaculosAtivos = [];
-  velocidadeGlobalObstaculos = 4; // Reseta no novo jogo
-
+  pulandoNoAr = false;
+  abaixando = false;
   tempoDeSobrevivencia = 0;
   pulosRealizados = 0;
   obstaculosEvitados = 0;
+  velocidadeGlobal = 4;
 
   document.getElementById("tempo").innerText = `⏱️ Tempo: 00:00:00`;
   document.getElementById("pulos").innerText = `🦘 Pulos: 0`;
   document.getElementById("evitados").innerText = `🧱 Evitados: 0`;
-  document.getElementById("status").innerText = `🎮 Em jogo...`;
+  document.getElementById("status").innerText = `🎾 Em jogo...`;
 
-  dinofauro.style.height = "40px";
-  dinofauro.style.bottom = "0px";
+  overlayGameOver.style.display = "none";
 
   iniciarContadorDeTempo();
 
-  if (modoIA) {
-    iniciarIA();
-  } else {
-    ativarTecladoJogador();
-  }
+  obstaculosAtivos.forEach(obs => obs.remove());
+  obstaculosAtivos = [];
 
-  setInterval(criarObstaculo, intervaloSpawn);
+  if (modoIA) iniciarIA();
+  else ativarTecladoJogador();
+
+  clearInterval(intervaloSpawnID);
+  intervaloSpawnID = setInterval(criarObstaculo, intervaloSpawn + Math.random() * 400);
   requestAnimationFrame(moverObstaculos);
 }
 
 function resetarJogo() {
   jogoEmAndamento = false;
   houveColisao = false;
+
+  if (cronometroID) clearInterval(cronometroID);
+  if (intervaloSpawnID) clearInterval(intervaloSpawnID);
+
   obstaculosAtivos.forEach(obs => obs.remove());
   obstaculosAtivos = [];
 
-  dinofauro.style.height = "40px";
+  dinofauro.style.height = "60px";
   dinofauro.style.bottom = "0px";
 
-  document.getElementById("status").innerText = "🕹️ Aguardando início...";
-  document.removeEventListener("keydown", aoPressionarTecla);
-  document.removeEventListener("keyup", aoSoltarTecla);
-
-  if (cronometroID) {
-    clearInterval(cronometroID);
-    cronometroID = null;
-  }
-
+  document.getElementById("status").innerText = `🕹️ Aguardando início...`;
   document.getElementById("botao-start").disabled = false;
 }
 
-// ========== [COLISÃO E LOOP PRINCIPAL] ========== //
+// ========== [COLISÃO COM DIFERENCIAÇÃO] ========== //
 
 function checarColisao() {
-  if (houveColisao) return;
+  if (houveColisao || !jogoEmAndamento) return;
 
-  const dinofauroBox = dinofauro.getBoundingClientRect();
+  const dinoBox = dinofauro.getBoundingClientRect();
 
-  obstaculosAtivos.forEach(obstaculo => {
+  for (const obstaculo of obstaculosAtivos) {
     const obstaculoBox = obstaculo.getBoundingClientRect();
+    const tipo = obstaculo.classList.contains("obstaculo-voador") ? "voador" : "chao";
 
-    if (
-      dinofauroBox.right > obstaculoBox.left + 5 &&
-      dinofauroBox.left < obstaculoBox.right - 5 &&
-      dinofauroBox.bottom > obstaculoBox.top
-    ) {
-      houveColisao = true;
-      jogoEmAndamento = false;
-
-      logEventos.push({
-        tempo: tempoDeSobrevivencia,
-        evento: "colisao",
-        agente: modoIA ? "IA" : "Jogador",
-        distancia: Math.floor(obstaculo.offsetLeft - dinofauro.offsetLeft),
-        velocidade: parseFloat(obstaculo.dataset.velocidade)
-      });
-
-      document.getElementById("status").innerText = "💀 Game Over!";
-      alert("💀 Game Over! O Espinhudo venceu essa rodada...");
-      resetarJogo();
+    if (tipo === "chao") {
+      if (
+        dinoBox.right > obstaculoBox.left + 5 &&
+        dinoBox.left < obstaculoBox.right - 5 &&
+        dinoBox.bottom > obstaculoBox.top + 5
+      ) {
+        houveColisao = true;
+      }
+    } else if (tipo === "voador") {
+      if (
+        dinoBox.right > obstaculoBox.left + 5 &&
+        dinoBox.left < obstaculoBox.right - 5 &&
+        dinoBox.top < obstaculoBox.bottom - 5
+      ) {
+        houveColisao = true;
+      }
     }
-  });
+
+    if (houveColisao) {
+      jogoEmAndamento = false;
+      overlayGameOver.style.display = "flex";
+      resetarJogo();
+      break;
+    }
+  }
 }
 
 setInterval(checarColisao, 10);
 
-// ========== [INTERAÇÃO COM A INTERFACE] ========== //
+// ========== [INTERFACE] ========== //
 
 window.onload = () => {
-  document.getElementById("status").innerText = "🕹️ Aguardando início...";
+  document.getElementById("status").innerText = `🕹️ Aguardando início...`;
+  overlayGameOver.style.display = "none";
+  document.getElementById("modo-jogo").value = "ia"; // Agora realmente começa no modo IA
 };
 
 document.getElementById("botao-start").addEventListener("click", () => {
@@ -323,25 +259,4 @@ document.getElementById("botao-start").addEventListener("click", () => {
 
 document.getElementById("botao-parar").addEventListener("click", () => {
   resetarJogo();
-  document.getElementById("status").innerText = "⏸️ Jogo pausado.";
 });
-
-document.getElementById("botao-exportar").addEventListener("click", exportarLogs);
-
-function exportarLogs() {
-  if (logEventos.length === 0) {
-    alert("Nenhum evento registrado.");
-    return;
-  }
-
-  const dados = JSON.stringify(logEventos, null, 2);
-  const blob = new Blob([dados], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `logs_dino_${Date.now()}.json`;
-  a.click();
-
-  URL.revokeObjectURL(url);
-}
