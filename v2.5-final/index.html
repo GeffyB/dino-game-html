@@ -1,0 +1,63 @@
+<!-- ------------------------------------------------------------ -->
+<!-- index.html — DinoFauro 🦖 -->
+<!-- Versão: v2.5-final | Tutorial e Exportação de Logs -->
+<!-- ------------------------------------------------------------ -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DinoFauro 🦖</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- ========== TÍTULO ========== -->
+  <h1 id="titulo-jogo">DinoFauro 🦖</h1>
+
+  <!-- ========== HUD DE JOGO ========== -->
+  <div id="hud">
+    <span id="tempo">⏱️ Tempo: 00:00:00</span> |
+    <span id="pulos">🦘 Pulos: 0</span> |
+    <span id="evitados">🧱 Evitados: 0</span> |
+    <span id="status">🕹️ Aguardando início...</span>
+  </div>
+
+  <!-- ========== ÁREA DE JOGO ========== -->
+  <div id="game-container">
+    <div id="dinofauro"></div>
+    <div id="overlay-gameover">💀 Game Over!</div>
+    <!-- Obstáculos dinâmicos serão adicionados aqui via JavaScript -->
+  </div>
+
+  <!-- ========== PAINEL DE CONTROLE ========== -->
+  <div id="painel-botoes">
+    <button id="botao-start">▶️ Iniciar Jogo</button>
+    <button id="botao-parar">⏸️ Parar Jogo</button>
+    <select id="modo-jogo">
+      <option value="jogador">🎮 Jogador</option>
+      <option value="ia">🤖 IA</option>
+    </select>
+    <button id="botao-exportar">📤 Exportar Logs</button>
+  </div>
+
+  <!-- ========== MINI TUTORIAL ========== -->
+  <div id="tutorial">
+    <h3>📚 Como Jogar:</h3>
+    <ul>
+      <li><strong>Barra de Espaço</strong> → Salta</li>
+      <li><strong>Seta para Baixo</strong> → Abaixar</li>
+      <li>🎮 Selecione <strong>Modo Jogador</strong> para jogar manualmente.</li>
+      <li>🤖 Selecione <strong>Modo IA</strong> para ver a IA jogando sozinha.</li>
+      <li>📤 Clique em <strong>Exportar Logs</strong> para baixar o histórico da partida.</li>
+    </ul>
+  </div>
+
+  <!-- ========== IMPORTAÇÃO DE SCRIPTS ========== -->
+  <script src="agent.js"></script>
+  <script src="game.js"></script>
+
+</body>
+</html>

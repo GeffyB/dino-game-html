@@ -1,0 +1,129 @@
+/* ------------------------------------------------------------ */
+/* style.css — DinoFauro 🦖 Estilização Principal */
+/* Versão: v2.5-final */
+/* ------------------------------------------------------------ */
+
+/* ========== RESET GERAL ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ========== CORPO PRINCIPAL ========== */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f7f7f7;
+  text-align: center;
+  padding: 20px;
+}
+
+/* ========== TÍTULO ========== */
+#titulo-jogo {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+/* ========== HUD ========== */
+#hud {
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+}
+
+/* ========== ÁREA DE JOGO ========== */
+#game-container {
+  position: relative;
+  width: 800px;
+  height: 200px;
+  margin: 0 auto 20px auto;
+  background-color: #c8e6c9;
+  border: 2px solid #333;
+  overflow: hidden;
+}
+
+/* Dino */
+#dinofauro {
+  position: absolute;
+  bottom: 0;
+  left: 80px;
+  width: 40px;
+  height: 60px;
+  background-color: #4caf50;
+  border-radius: 8px;
+}
+
+/* Overlay Game Over */
+#overlay-gameover {
+  display: none;
+  position: absolute;
+  top: 30%;
+  width: 100%;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: red;
+}
+
+/* Obstáculos */
+.obstaculo {
+  position: absolute;
+  bottom: 0;
+  width: 20px;
+  height: 40px;
+  background-color: #f44336;
+  border-radius: 8px;
+}
+
+.obstaculo-baixo {
+  position: absolute;
+  bottom: 0;
+  width: 30px;
+  height: 20px;
+  background-color: #f57c00;
+  border-radius: 8px;
+}
+
+.obstaculo-voador {
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  background-color: #3f51b5;
+  border-radius: 50%;
+}
+
+/* ========== PAINEL DE BOTÕES ========== */
+#painel-botoes {
+  margin-bottom: 20px;
+}
+
+button, select {
+  margin: 0 10px;
+  padding: 8px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* ========== MINI-TUTORIAL ========== */
+#tutorial {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 15px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  text-align: left;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#tutorial h3 {
+  margin-bottom: 10px;
+}
+
+#tutorial ul {
+  list-style: none;
+}
+
+#tutorial li {
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
